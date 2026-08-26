@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Pineapple Crown/Leaves -->
+  <path d="M50 8 C40 18 32 30 35 42 C45 35 50 22 50 8 Z" fill="#15803d" />
+  <path d="M50 8 C60 18 68 30 65 42 C55 35 50 22 50 8 Z" fill="#16a34a" />
+  <path d="M50 14 C35 20 22 32 20 45 C35 42 45 32 50 14 Z" fill="#22c55e" />
+  <path d="M50 14 C65 20 78 32 80 45 C65 42 55 32 50 14 Z" fill="#4ade80" />
+
+  <!-- Pineapple Fruit Body -->
+  <ellipse cx="50" cy="64" rx="28" ry="32" fill="#f59e0b" />
+  <ellipse cx="50" cy="64" rx="25" ry="29" fill="#fbbf24" />
+
+  <!-- Diamond Patterns / Texture -->
+  <path d="M50 35 L62 48 L50 61 L38 48 Z" fill="#d97706" opacity="0.6" />
+  <path d="M38 48 L50 61 L38 74 L26 61 Z" fill="#d97706" opacity="0.6" />
+  <path d="M62 48 L74 61 L62 74 L50 61 Z" fill="#d97706" opacity="0.6" />
+  <path d="M50 61 L62 74 L50 87 L38 74 Z" fill="#d97706" opacity="0.6" />
+
+  <circle cx="50" cy="48" r="2.5" fill="#fef3c7" />
+  <circle cx="38" cy="61" r="2.5" fill="#fef3c7" />
+  <circle cx="62" cy="61" r="2.5" fill="#fef3c7" />
+  <circle cx="50" cy="74" r="2.5" fill="#fef3c7" />
+</svg>
