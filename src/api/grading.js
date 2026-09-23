@@ -6,7 +6,9 @@ import { apiClient } from "./client";
  */
 export async function scanPineapple(batchId, { foto, inputBrixManual, inputBeratManualKg }) {
   const formData = new FormData();
-  formData.append("foto", foto);
+  formData.append("file", foto); // Backend uses upload.single("file")
+  formData.append("batch_id", batchId);
+
   if (inputBrixManual !== undefined && inputBrixManual !== "") {
     formData.append("input_brix_manual", inputBrixManual);
   }
@@ -14,15 +16,16 @@ export async function scanPineapple(batchId, { foto, inputBrixManual, inputBerat
     formData.append("input_berat_manual_kg", inputBeratManualKg);
   }
 
-  const { data } = await apiClient.post(`/grading/${batchId}/scan`, formData, {
+  const { data } = await apiClient.post(`/yolo/scan`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  return data;
+  return data.grading || data;
 }
 
 export async function getGradingResults(batchId) {
-  const { data } = await apiClient.get(`/grading/${batchId}/results`);
-  return data;
+  // Backend getBatch already includes gradings
+  const { data } = await apiClient.get(`/batches/${batchId}`);
+  return data.gradings || [];
 }
 
 export async function getGradingDetail(gradingId) {
