@@ -22,6 +22,14 @@ export async function scanPineapple(batchId, { foto, inputBrixManual, inputBerat
   return data.grading || data;
 }
 
+export async function saveManualGrading(batchId, manualData) {
+  const { data } = await apiClient.post(`/yolo/save-result`, {
+    batch_id: batchId,
+    yolo_result: manualData
+  });
+  return data.grading || data;
+}
+
 export async function getGradingResults(batchId) {
   // Backend getBatch already includes gradings
   const { data } = await apiClient.get(`/batches/${batchId}`);

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getBatch, verifyBatchIntegrity, getBatchQrCodeObjectUrl } from "../api/batches";
-import { getGradingResults, scanPineapple } from "../api/grading";
+import { getGradingResults, scanPineapple, saveManualGrading } from "../api/grading";
 
 const GRADE_COLORS = {
   "Grade A": "bg-emerald-100 text-emerald-800 border border-emerald-300",
@@ -28,6 +28,18 @@ export default function BatchDetailPage() {
   const [berat, setBerat] = useState("");
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
+
+  const [gradingMode, setGradingMode] = useState("AI");
+  const [manualData, setManualData] = useState({
+    grade: "A",
+    sizeScore: "Sedang",
+    colorScore: "Kuning",
+    kematangan: 80,
+    shapeScore: "Sempurna",
+    defectScore: "Tidak Ada Cacat",
+    confidence: 1.0,
+    weight: 1.0
+  });
 
   function loadAll() {
     getBatch(batchId).then(setBatch).catch(() => setError("Gagal memuat data batch."));
@@ -75,6 +87,22 @@ export default function BatchDetailPage() {
       loadAll();
     } catch (err) {
       setError(err.response?.data?.detail || "Gagal memproses grading.");
+    } finally {
+      setIsScanning(false);
+    }
+  }
+
+  async function handleManualSubmit(e) {
+    e.preventDefault();
+    setIsScanning(true);
+    setScanResult(null);
+    setError("");
+    try {
+      const result = await saveManualGrading(batchId, manualData);
+      setScanResult(result);
+      loadAll();
+    } catch (err) {
+      setError(err.response?.data?.detail || "Gagal menyimpan grading manual.");
     } finally {
       setIsScanning(false);
     }
@@ -156,73 +184,203 @@ export default function BatchDetailPage() {
 
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
                 <h3 className="font-bold text-slate-900 text-base flex items-center gap-2">
-                  <span>📸</span> Scan AI Grading (YOLOv11)
+                  <span>📸</span> Input Data Grading
                 </h3>
-                <span className="text-[11px] font-bold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md">
-                  Realtime Inference
-                </span>
+                <div className="flex bg-slate-100 rounded-lg p-1">
+                  <button
+                    onClick={() => setGradingMode("AI")}
+                    className={`px-3 py-1 text-xs font-bold rounded-md transition ${gradingMode === "AI" ? "bg-white text-emerald-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    AI YOLOv11
+                  </button>
+                  <button
+                    onClick={() => setGradingMode("Manual")}
+                    className={`px-3 py-1 text-xs font-bold rounded-md transition ${gradingMode === "Manual" ? "bg-white text-emerald-800 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  >
+                    Manual Input
+                  </button>
+                </div>
               </div>
 
-              <form onSubmit={handleScan} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                    Unggah Foto Nanas
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    required
-                    onChange={(e) => setFoto(e.target.files?.[0] || null)}
-                    className="block w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4
-                               file:rounded-xl file:border-0 file:bg-emerald-700 file:text-white
-                               file:font-bold hover:file:bg-emerald-800 transition cursor-pointer"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+              {gradingMode === "AI" ? (
+                <form onSubmit={handleScan} className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Brix Manual (Brix °)
+                      Unggah Foto Nanas
                     </label>
                     <input
-                      type="number"
-                      step="0.1"
-                      placeholder="Contoh: 14.5"
-                      value={brix}
-                      onChange={(e) => setBrix(e.target.value)}
-                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"
+                      type="file"
+                      accept="image/*"
+                      required
+                      onChange={(e) => setFoto(e.target.files?.[0] || null)}
+                      className="block w-full text-xs text-slate-600 file:mr-3 file:py-2.5 file:px-4
+                                 file:rounded-xl file:border-0 file:bg-emerald-700 file:text-white
+                                 file:font-bold hover:file:bg-emerald-800 transition cursor-pointer"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                      Berat Buah (Kg)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      placeholder="Contoh: 1.85"
-                      value={berat}
-                      onChange={(e) => setBerat(e.target.value)}
-                      className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"
-                    />
-                  </div>
-                </div>
 
-                <button
-                  type="submit"
-                  disabled={isScanning || !foto}
-                  className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-bold rounded-xl py-3 text-sm transition shadow-md shadow-emerald-800/20 flex items-center justify-center gap-2"
-                >
-                  {isScanning ? (
-                    <>
-                      <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                      <span>Menjalankan Deteksi AI YOLOv11...</span>
-                    </>
-                  ) : (
-                    <span>Proses Scan & Klasifikasi Grade</span>
-                  )}
-                </button>
-              </form>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Brix Manual (Brix °)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.1"
+                        placeholder="Contoh: 14.5"
+                        value={brix}
+                        onChange={(e) => setBrix(e.target.value)}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Berat Buah (Kg)
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="Contoh: 1.85"
+                        value={berat}
+                        onChange={(e) => setBerat(e.target.value)}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2.5 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none transition"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={isScanning || !foto}
+                    className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-bold rounded-xl py-3 text-sm transition shadow-md shadow-emerald-800/20 flex items-center justify-center gap-2"
+                  >
+                    {isScanning ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        <span>Menjalankan Deteksi AI YOLOv11...</span>
+                      </>
+                    ) : (
+                      <span>Proses Scan AI & Klasifikasi Grade</span>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={handleManualSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Grade Mutu
+                      </label>
+                      <select
+                        value={manualData.grade}
+                        onChange={(e) => setManualData({...manualData, grade: e.target.value})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="A">Grade A (Ekspor)</option>
+                        <option value="B">Grade B (Premium Lokal)</option>
+                        <option value="C">Grade C (Standar)</option>
+                        <option value="Reject">Reject</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Ukuran
+                      </label>
+                      <select
+                        value={manualData.sizeScore}
+                        onChange={(e) => setManualData({...manualData, sizeScore: e.target.value})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="Kecil">Kecil (&lt; 0.8 kg)</option>
+                        <option value="Sedang">Sedang (0.8 - 1.2 kg)</option>
+                        <option value="Besar">Besar (&gt; 1.2 kg)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Warna Kulit
+                      </label>
+                      <select
+                        value={manualData.colorScore}
+                        onChange={(e) => setManualData({...manualData, colorScore: e.target.value})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="Hijau">Hijau (Mentah)</option>
+                        <option value="Kuning Hijau">Kuning Hijau (Mengkal)</option>
+                        <option value="Kuning">Kuning (Matang)</option>
+                        <option value="Oranye">Oranye (Terlalu Matang)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Kematangan (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="0" max="100"
+                        value={manualData.kematangan}
+                        onChange={(e) => setManualData({...manualData, kematangan: Number(e.target.value)})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Kondisi Mahkota
+                      </label>
+                      <select
+                        value={manualData.shapeScore}
+                        onChange={(e) => setManualData({...manualData, shapeScore: e.target.value})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="Sempurna">Sempurna</option>
+                        <option value="Miring">Miring</option>
+                        <option value="Cacat">Cacat</option>
+                        <option value="Tidak Ada">Tidak Ada</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Kondisi Defect
+                      </label>
+                      <select
+                        value={manualData.defectScore}
+                        onChange={(e) => setManualData({...manualData, defectScore: e.target.value})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      >
+                        <option value="Tidak Ada Cacat">Tidak Ada Cacat</option>
+                        <option value="Luka Mekanis">Luka Mekanis</option>
+                        <option value="Busuk">Busuk</option>
+                        <option value="Hama/Penyakit">Hama/Penyakit</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                        Berat (Kg)
+                      </label>
+                      <input
+                        type="number" step="0.01"
+                        value={manualData.weight}
+                        onChange={(e) => setManualData({...manualData, weight: Number(e.target.value)})}
+                        className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  
+                  <button
+                    type="submit"
+                    disabled={isScanning}
+                    className="w-full bg-slate-800 hover:bg-slate-900 disabled:opacity-60 text-white font-bold rounded-xl py-3 text-sm transition shadow-md flex items-center justify-center gap-2"
+                  >
+                    {isScanning ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        <span>Menyimpan...</span>
+                      </>
+                    ) : (
+                      <span>Simpan Grading Manual</span>
+                    )}
+                  </button>
+                </form>
+              )}
 
               {scanResult && (
                 <div className="mt-5 rounded-xl border border-emerald-200 p-4 bg-emerald-50/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
