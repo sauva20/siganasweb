@@ -111,11 +111,33 @@ export default function BatchDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+        <div className="flex flex-col gap-2">
+          <span className="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5 self-end">
             <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
             Total {batch.total_buah ?? 0} Buah
           </span>
+          <button
+            onClick={() => {
+              // Mock seal action for now, this would usually call an API
+              alert('Fungsi Seal (Kunci Batch) sedang dalam perbaikan / akan memanggil endpoint /seal');
+            }}
+            className="text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg px-4 py-2 shadow-sm transition"
+          >
+            🔒 Akhiri & Kunci Batch
+          </button>
+        </div>
+      </div>
+
+      {/* Grade Progress Bars */}
+      <div className="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-xs">
+        <h3 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <span className="w-2 h-5 bg-emerald-600 rounded-full"></span> Distribusi Mutu Panen
+        </h3>
+        <div className="space-y-4">
+          <ProgressBar label="Grade A (Ekspor)" value={batch.jumlah_grade_a} total={batch.total_buah} color="bg-emerald-500" />
+          <ProgressBar label="Grade B (Premium Lokal)" value={batch.jumlah_grade_b} total={batch.total_buah} color="bg-amber-500" />
+          <ProgressBar label="Grade C (Standar)" value={batch.jumlah_grade_c} total={batch.total_buah} color="bg-blue-500" />
+          <ProgressBar label="Reject" value={batch.jumlah_reject} total={batch.total_buah} color="bg-rose-500" />
         </div>
       </div>
 
@@ -279,16 +301,18 @@ export default function BatchDetailPage() {
             <p className="text-xs text-slate-500 mb-4">
               Scan untuk melihat bukti keaslian blockchain & profil kebun publik.
             </p>
-            {qrUrl ? (
-              <img src={qrUrl} alt="QR Code Batch" className="mx-auto rounded-xl border border-slate-200 shadow-sm w-48 h-48" />
-            ) : (
-              <button
-                onClick={handleLoadQr}
-                className="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold rounded-xl py-3 text-xs transition"
-              >
-                Tampilkan QR Code Batch
-              </button>
-            )}
+            <img 
+              src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`https://siganas.com/public/trace/${batch.kode_batch}`)}`} 
+              alt="QR Code Batch" 
+              className="mx-auto rounded-xl border border-slate-200 shadow-sm w-48 h-48" 
+            />
+            <a
+              href={`https://siganas.com/public/trace/${batch.kode_batch}`}
+              target="_blank" rel="noreferrer"
+              className="mt-4 block w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold rounded-xl py-2.5 text-xs transition text-center"
+            >
+              Buka Halaman Traceability
+            </a>
           </div>
 
           {/* Blockchain Verification */}
@@ -344,6 +368,21 @@ function Row({ label, value }) {
     <div className="flex justify-between pt-2">
       <dt className="text-slate-500 font-medium">{label}</dt>
       <dd className="font-bold text-slate-900">{value}</dd>
+    </div>
+  );
+}
+
+function ProgressBar({ label, value, total, color }) {
+  const percentage = total > 0 ? Math.round(((value || 0) / total) * 100) : 0;
+  return (
+    <div>
+      <div className="flex justify-between text-xs font-bold mb-1">
+        <span className="text-slate-700">{label}</span>
+        <span className="text-slate-500">{value || 0} ({percentage}%)</span>
+      </div>
+      <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+        <div className={`h-2.5 rounded-full ${color} transition-all duration-1000 ease-out`} style={{ width: `${percentage}%` }}></div>
+      </div>
     </div>
   );
 }

@@ -146,28 +146,33 @@ function DinasSummary() {
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-      {cards.map((c) => (
+      {cards.map((card, i) => (
         <div
-          key={c.label}
-          className="relative bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between overflow-hidden group"
+          key={i}
+          className="group relative overflow-hidden rounded-2xl bg-white border border-slate-200/60 shadow-sm hover:shadow-xl hover:-translate-y-1 hover:scale-[1.02] transition-all duration-300 ease-out cursor-pointer"
         >
-          <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${c.gradient}`}></div>
-          <div>
-            <div className="flex items-center justify-between gap-1 mb-2">
-              <span className="text-xl">{c.icon}</span>
-              <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full border ${c.bgLight}`}>
-                {c.badge}
+          <div className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${card.gradient} opacity-80 group-hover:opacity-100 transition-opacity`}></div>
+          <div className="p-5 relative z-10 flex flex-col h-full">
+            <div className="flex items-start justify-between mb-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-lg ${card.bgLight} border group-hover:scale-110 transition-transform duration-300`}>
+                {card.icon}
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                {card.badge}
               </span>
             </div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{c.label}</p>
+            
+            <div className="mt-auto">
+              <h4 className="text-slate-500 text-xs font-medium mb-1">{card.label}</h4>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-2xl font-black text-slate-800 tracking-tight group-hover:text-emerald-700 transition-colors">{card.value}</span>
+                <span className="text-xs font-semibold text-slate-400">{card.unit}</span>
+              </div>
+            </div>
           </div>
-
-          <div className="mt-3">
-            <p className="text-2xl font-black text-slate-900 group-hover:scale-105 transition-transform origin-left">
-              {c.value}
-            </p>
-            <p className="text-[11px] font-medium text-slate-400 mt-0.5">{c.unit}</p>
-          </div>
+          
+          {/* Decorative background circle */}
+          <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-slate-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
         </div>
       ))}
     </div>
