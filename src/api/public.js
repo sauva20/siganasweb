@@ -6,5 +6,8 @@ import { publicClient } from "./client";
  */
 export async function traceBatch(kodeBatch) {
   const { data } = await publicClient.get(`/public/trace/${kodeBatch}`);
-  return data;
+  return {
+    ...data.batch_info,
+    verifikasi_integritas: data.blockchain_verification
+  };
 }

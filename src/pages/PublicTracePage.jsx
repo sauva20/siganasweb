@@ -60,19 +60,15 @@ export default function PublicTracePage() {
 
               {/* Grid Metadata */}
               <dl className="grid grid-cols-2 gap-4 text-xs">
-                <MetaItem icon="📅" label="Tanggal Panen" value={data.tanggal_panen || "-"} />
-                <MetaItem icon="🚚" label="Status Distribusi" value={data.status_distribusi || "-"} />
-                <MetaItem icon="🏡" label="Kebun Asal" value={data.asal?.nama_kebun || "-"} />
-                <MetaItem icon="🍍" label="Varietas Nanas" value={data.asal?.varietas_nanas || "-"} />
+                <MetaItem icon="📅" label="Tanggal Panen" value={new Date(data.tanggal_panen).toLocaleDateString("id-ID") || "-"} />
+                <MetaItem icon="🚚" label="Status Distribusi" value={data.status_distribusi ? data.status_distribusi.replace("_", " ") : "-"} />
+                <MetaItem icon="🏡" label="Kebun Asal" value={data.kebun?.nama_kebun || "-"} />
+                <MetaItem icon="👤" label="Petani" value={data.kebun?.petani?.nama_lengkap || "-"} />
                 <div className="col-span-2">
                   <MetaItem
                     icon="📍"
-                    label="Koordinat GPS Kebun"
-                    value={
-                      data.asal?.lokasi_gps?.latitude
-                        ? `${data.asal.lokasi_gps.latitude}, ${data.asal.lokasi_gps.longitude}`
-                        : "-"
-                    }
+                    label="Detail Asal"
+                    value={`Nanas dari kebun ${data.kebun?.nama_kebun} yang dikelola oleh ${data.kebun?.petani?.nama_lengkap}.`}
                   />
                 </div>
               </dl>
@@ -83,10 +79,10 @@ export default function PublicTracePage() {
                   <span>📊</span> Rekapitulasi Mutu Batch
                 </h3>
                 <div className="grid grid-cols-4 gap-2 text-center">
-                  <GradeCell label="Grade A" value={data.rekap_grade?.grade_a_ekspor} color="bg-emerald-100 text-emerald-800 border-emerald-200" />
-                  <GradeCell label="Grade B" value={data.rekap_grade?.grade_b_premium_lokal} color="bg-amber-100 text-amber-800 border-amber-200" />
-                  <GradeCell label="Grade C" value={data.rekap_grade?.grade_c_standar} color="bg-blue-100 text-blue-800 border-blue-200" />
-                  <GradeCell label="Reject" value={data.rekap_grade?.reject} color="bg-rose-100 text-rose-800 border-rose-200" />
+                  <GradeCell label="Grade A" value={data.jumlah_grade_a} color="bg-emerald-100 text-emerald-800 border-emerald-200" />
+                  <GradeCell label="Grade B" value={data.jumlah_grade_b} color="bg-amber-100 text-amber-800 border-amber-200" />
+                  <GradeCell label="Grade C" value={data.jumlah_grade_c} color="bg-blue-100 text-blue-800 border-blue-200" />
+                  <GradeCell label="Reject" value={data.jumlah_reject} color="bg-rose-100 text-rose-800 border-rose-200" />
                 </div>
               </div>
 
