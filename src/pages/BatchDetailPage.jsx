@@ -32,10 +32,10 @@ export default function BatchDetailPage() {
   const [gradingMode, setGradingMode] = useState("AI");
   const [manualData, setManualData] = useState({
     grade: "A",
-    sizeScore: "Sedang",
-    colorScore: "Kuning",
+    sizeScore: "sedang",
+    colorScore: "kuning",
     kematangan: 80,
-    shapeScore: "Sempurna",
+    shapeScore: "sempurna",
     defectScore: "Tidak Ada Cacat",
     confidence: 1.0,
     weight: 1.0
@@ -290,9 +290,9 @@ export default function BatchDetailPage() {
                         onChange={(e) => setManualData({...manualData, sizeScore: e.target.value})}
                         className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       >
-                        <option value="Kecil">Kecil (&lt; 0.8 kg)</option>
-                        <option value="Sedang">Sedang (0.8 - 1.2 kg)</option>
-                        <option value="Besar">Besar (&gt; 1.2 kg)</option>
+                        <option value="kecil">Kecil (&lt; 0.8 kg)</option>
+                        <option value="sedang">Sedang (0.8 - 1.2 kg)</option>
+                        <option value="besar">Besar (&gt; 1.2 kg)</option>
                       </select>
                     </div>
                     <div>
@@ -304,10 +304,10 @@ export default function BatchDetailPage() {
                         onChange={(e) => setManualData({...manualData, colorScore: e.target.value})}
                         className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       >
-                        <option value="Hijau">Hijau (Mentah)</option>
-                        <option value="Kuning Hijau">Kuning Hijau (Mengkal)</option>
-                        <option value="Kuning">Kuning (Matang)</option>
-                        <option value="Oranye">Oranye (Terlalu Matang)</option>
+                        <option value="hijau">Hijau (Mentah)</option>
+                        <option value="kuning_kehijauan">Kuning Hijau (Mengkal)</option>
+                        <option value="kuning">Kuning (Matang)</option>
+                        <option value="oranye">Oranye (Terlalu Matang)</option>
                       </select>
                     </div>
                     <div>
@@ -331,10 +331,8 @@ export default function BatchDetailPage() {
                         onChange={(e) => setManualData({...manualData, shapeScore: e.target.value})}
                         className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-2 text-sm text-slate-800 focus:bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                       >
-                        <option value="Sempurna">Sempurna</option>
-                        <option value="Miring">Miring</option>
-                        <option value="Cacat">Cacat</option>
-                        <option value="Tidak Ada">Tidak Ada</option>
+                        <option value="sempurna">Sempurna</option>
+                        <option value="cacat_rusak">Cacat / Tidak Sempurna</option>
                       </select>
                     </div>
                     <div>
