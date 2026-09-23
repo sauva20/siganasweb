@@ -33,8 +33,7 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Client terpisah untuk endpoint publik (traceability, tidak butuh token,
-// dan tidak pakai prefix /api/v1 — lihat main.py backend).
+// Client terpisah untuk endpoint publik (traceability, tidak butuh token)
 export const publicClient = axios.create({
-  baseURL,
+  baseURL: `${baseURL}/api/v1/public`,
 });
